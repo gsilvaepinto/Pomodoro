@@ -8,7 +8,7 @@ const clock = document.querySelector('#clock');
 const startButton = document.querySelector('#start');
 const resetButton = document.querySelector('#reset');
 
-let timeLeft = 0.1 * 60;
+let timeLeft = 25 * 60;
 let timeInterval;
 let isRunning = false;
 
