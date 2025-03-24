@@ -1,111 +1,103 @@
 const body = document.querySelector('body');
 const container = document.querySelector('.container');
 const pomodoroTag = document.querySelector('#pomodoro');
-const shortTag = document.querySelector('#shortbreak');
-const longTag = document.querySelector('#longbreak');
+const shortBreakTag = document.querySelector('#shortbreak');
+const longBreakTag = document.querySelector('#longbreak');
+const options = document.querySelectorAll('.option');
+const clock = document.querySelector('#clock');
 const startButton = document.querySelector('#start');
 const resetButton = document.querySelector('#reset');
-const clock = document.querySelector('#clock');
-const options = document.querySelectorAll(".option");
 
-let timeLeft = 25 * 60;
+let timeLeft = 0.1 * 60;
 let timeInterval;
 let isRunning = false;
 
-function updateTimer() {
+function updateTimer(){
     let minutes = Math.floor(timeLeft / 60);
     let seconds = timeLeft % 60;
     clock.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
-function startPauseTimer() {
-    if (!isRunning) {
+function startPauseTimer(){
+    if (!isRunning){
         isRunning = true;
-        startButton.textContent = 'PAUSE';
         resetButton.style.display = 'block';
+        startButton.textContent = 'PAUSE';
 
         timeInterval = setInterval(() => {
-            if (timeLeft > 0) {
+            if (timeLeft > 0){
                 timeLeft--;
                 updateTimer();
             } else {
-                clearInterval(timeInterval);
-                isRunning = false;
                 startButton.textContent = 'START';
+                startButton.disabled = true;
+                startButton.style.opacity = 0.7;
+                clearInterval(timeInterval);
             }
-        }, 1000);
+        }, 1000)
     } else {
         isRunning = false;
-        clearInterval(timeInterval);
         startButton.textContent = 'START';
+        resetButton.style.display = 'none';
+        clearInterval(timeInterval);
     }
 }
 
-// Resets the timer and stops it
-function resetTimer() {
-    clearInterval(timeInterval);
+function resetTimer(){
+
     isRunning = false;
+    clearInterval(timeInterval);
+    startButton.disabled = false;
     startButton.textContent = 'START';
+    startButton.style.opacity = 1;
     resetButton.style.display = 'none';
 
-    // Set correct time based on selected mode
-    if (pomodoroTag.classList.contains('selected')) {
+    if (pomodoroTag.classList.contains('selected')){
         timeLeft = 25 * 60;
-    } else if (shortTag.classList.contains('selected')) {
+    }
+    else if (shortBreakTag.classList.contains('selected')){
         timeLeft = 5 * 60;
-    } else if (longTag.classList.contains('selected')) {
+    }
+    else if (longBreakTag.classList.contains('selected')){
         timeLeft = 15 * 60;
     }
 
     updateTimer();
 }
 
-// Handles mode switching and resets timer
-function changeMode() {
-    pomodoroTag.addEventListener('click', () => {
-        setMode('#8FBFE0', '#6FA7CC', '#6FA7CC', 25 * 60, pomodoroTag);
-    });
-
-    shortTag.addEventListener('click', () => {
-        setMode('#7C77B9', '#A098D1', '#A098D1', 5 * 60, shortTag);
-    });
-
-    longTag.addEventListener('click', () => {
-        setMode('#1D8A99', '#44A3B2', '#44A3B2', 15 * 60, longTag);
-    });
+function changeMode(){
+    options.forEach(option => {
+        option.onclick = () => {
+            if (option.id === 'pomodoro') setMode('#8FBFE0', '#6FA7CC', '#6FA7CC', 25 * 60, option);
+            if (option.id === 'shortbreak') setMode('#7C77B9', '#A098D1', '#A098D1', 5 * 60, option);
+            if (option.id === 'longbreak') setMode('#1D8A99', '#44A3B2', '#44A3B2', 15 * 60, option);
+        }
+    })
 }
 
-// Updates the UI and resets timer when switching modes
-function setMode(bgColor, containerColor, textColor, newTime, selectedTag) {
+function setMode(bgColor, containerColor, textColor, newTime, selectedTag){
     body.style.backgroundColor = bgColor;
     container.style.backgroundColor = containerColor;
     startButton.style.color = textColor;
     resetButton.style.color = textColor;
 
-    clearInterval(timeInterval);
     isRunning = false;
+    resetButton.style.display = 'none';
+    startButton.style.opacity = 1;
+    startButton.disabled = false;
     startButton.textContent = 'START';
 
     timeLeft = newTime;
-    updateTimer();
+    clearInterval(timeInterval);
 
-    // Remove previous selections and apply new one
-    options.forEach(opt => opt.classList.remove('selected'));
+    options.forEach(option => option.classList.remove('selected'));
     selectedTag.classList.add('selected');
 
-    resetButton.style.display = 'none'; // Hide reset button when switching modes
+    updateTimer();
 }
 
-// Set event listeners for mode options
-options.forEach(option => {
-    option.addEventListener('click', () => {
-        options.forEach(opt => opt.classList.remove('selected'));
-        option.classList.add('selected');
-    });
-});
-
-// Initialize the timer and event listeners
 updateTimer();
 changeMode();
+
 startButton.addEventListener('click', startPauseTimer);
 resetButton.addEventListener('click', resetTimer);
